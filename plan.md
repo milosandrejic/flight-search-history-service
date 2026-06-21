@@ -123,9 +123,9 @@ test/
 ## Implementation Steps
 
 ### Phase 0: Scaffolding
-- [ ] **0.1** Init NestJS app, `tsconfig`, eslint/prettier, jest
-- [ ] **0.2** `ConfigModule` — env (table name, region, TTL seconds)
-- [ ] **0.3** `DynamoModule` — provide `DynamoDBDocumentClient` (region + credentials from env)
+- [x] **0.1** Init NestJS app, `tsconfig`, eslint/prettier, jest
+- [x] **0.2** `ConfigModule` — env (table name, region, TTL seconds)
+- [x] **0.3** `DynamoModule` — provide `DynamoDBDocumentClient` (region + credentials from env)
 - [ ] **0.4** `dynamo.constants.ts` — table/index names + injection tokens
 - [ ] **0.5** `/health` endpoint
 
