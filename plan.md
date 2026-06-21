@@ -135,7 +135,7 @@ test/
 - [x] **1.3** TTL (`expiresAt`) set on create
 - [x] **1.4** `SessionsService` — business logic
 - [x] **1.5** `SessionsController` — thin POST / GET
-- [ ] **1.6** Unit tests (mocked client)
+- [x] **1.6** Unit tests (mocked client)
 
 ### Phase 2: Search history (features 3, 4 + get-by-searchId)
 - [ ] **2.1** Search entity + DTOs

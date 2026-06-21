@@ -2,7 +2,8 @@
   "compilerOptions": {
     "module": "commonjs",
     "moduleResolution": "node",
-    "ignoreDeprecations": "6.0",
+    "ignoreDeprecations": "5.0",
+    "types": ["jest", "node"],
     "esModuleInterop": true,
     "isolatedModules": true,
     "declaration": true,
