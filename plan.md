@@ -130,11 +130,11 @@ test/
 - [x] **0.5** `/health` endpoint
 
 ### Phase 1: Sessions (features 1, 2, 6 TTL)
-- [ ] **1.1** Session entity + DTOs
-- [ ] **1.2** `SessionsRepository` — conditional `Put` (create), `GetItem` (by id)
-- [ ] **1.3** TTL (`expiresAt`) set on create
-- [ ] **1.4** `SessionsService` — business logic
-- [ ] **1.5** `SessionsController` — thin POST / GET
+- [x] **1.1** Session entity + DTOs
+- [x] **1.2** `SessionsRepository` — conditional `Put` (create), `GetItem` (by id)
+- [x] **1.3** TTL (`expiresAt`) set on create
+- [x] **1.4** `SessionsService` — business logic
+- [x] **1.5** `SessionsController` — thin POST / GET
 - [ ] **1.6** Unit tests (mocked client)
 
 ### Phase 2: Search history (features 3, 4 + get-by-searchId)
