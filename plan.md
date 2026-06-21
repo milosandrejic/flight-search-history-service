@@ -127,7 +127,7 @@ test/
 - [x] **0.2** `ConfigModule` — env (table name, region, TTL seconds)
 - [x] **0.3** `DynamoModule` — provide `DynamoDBDocumentClient` (region + credentials from env)
 - [x] **0.4** `dynamo.constants.ts` — table/index names + injection tokens
-- [ ] **0.5** `/health` endpoint
+- [x] **0.5** `/health` endpoint
 
 ### Phase 1: Sessions (features 1, 2, 6 TTL)
 - [ ] **1.1** Session entity + DTOs
