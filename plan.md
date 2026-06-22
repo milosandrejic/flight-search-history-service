@@ -146,10 +146,10 @@ test/
 - [x] **2.6** Unit tests
 
 ### Phase 3: Follow-up context (feature 5)
-- [ ] **3.1** FollowUp item write under session partition
-- [ ] **3.2** Query follow-ups for a session (`begins_with FOLLOWUP#`)
-- [ ] **3.3** "Continue session" — `Query` GSI2 for session searches
-- [ ] **3.4** Service + controller + tests
+- [x] **3.1** FollowUp item write under session partition
+- [x] **3.2** Query follow-ups for a session (`begins_with FOLLOWUP#`)
+- [x] **3.3** "Continue session" — `Query` GSI2 for session searches
+- [x] **3.4** Service + controller + tests
 
 ### Phase 4: Streams + Lambda (features 7, 8)
 - [ ] **4.1** CDK: enable stream (`NEW_AND_OLD_IMAGES`) + event source mapping

@@ -1,8 +1,8 @@
 import { mockClient } from "aws-sdk-client-mock";
 import { DYNAMO_CLIENT } from "@/common/dynamo/dynamo.module";
-import { KEY_PREFIX, GSI1_INDEX_NAME } from "@/common/dynamo/dynamo.constants";
 import { SearchEntity } from "@/modules/search-history/entities/search.entity";
 import { SearchHistoryRepository } from "@/modules/search-history/search-history.repository";
+import { KEY_PREFIX, GSI1_INDEX_NAME, GSI2_INDEX_NAME } from "@/common/dynamo/dynamo.constants";
 
 import { ConfigService } from "@nestjs/config";
 import { Test, TestingModule } from "@nestjs/testing";
@@ -141,6 +141,43 @@ describe("SearchHistoryRepository", () => {
       ddbMock.on(QueryCommand).resolves({ Items: [testEntity] });
 
       const result = await repository.getRecentByUser("user-1", 10);
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual(testEntity);
+    });
+  });
+
+  describe("getBySession", () => {
+    it("should send QueryCommand against GSI2 with correct session key", async () => {
+      ddbMock.on(QueryCommand).resolves({ Items: [] });
+
+      await repository.getBySession("session-1");
+
+      const call = ddbMock.commandCalls(QueryCommand)[0];
+
+      expect(call.args[0].input).toMatchObject({
+        TableName: TABLE_NAME,
+        IndexName: GSI2_INDEX_NAME,
+        KeyConditionExpression: "GSI2PK = :pk",
+        ExpressionAttributeValues: {
+          ":pk": `${KEY_PREFIX.SESSION}session-1`,
+        },
+        ScanIndexForward: false,
+      });
+    });
+
+    it("should return empty array when no searches in session", async () => {
+      ddbMock.on(QueryCommand).resolves({ Items: [] });
+
+      const result = await repository.getBySession("session-1");
+
+      expect(result).toEqual([]);
+    });
+
+    it("should return mapped entities when searches are found", async () => {
+      ddbMock.on(QueryCommand).resolves({ Items: [testEntity] });
+
+      const result = await repository.getBySession("session-1");
 
       expect(result).toHaveLength(1);
       expect(result[0]).toEqual(testEntity);
