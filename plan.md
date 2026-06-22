@@ -138,12 +138,12 @@ test/
 - [x] **1.6** Unit tests (mocked client)
 
 ### Phase 2: Search history (features 3, 4 + get-by-searchId)
-- [ ] **2.1** Search entity + DTOs
-- [ ] **2.2** `SearchHistoryRepository` — store search (`Put` with GSI1/GSI2 keys)
-- [ ] **2.3** Get recent searches for user — `Query` GSI1, desc, limit N
-- [ ] **2.4** Get search details by `searchId` — `GetItem`
-- [ ] **2.5** Service + controller
-- [ ] **2.6** Unit tests
+- [x] **2.1** Search entity + DTOs
+- [x] **2.2** `SearchHistoryRepository` — store search (`Put` with GSI1/GSI2 keys)
+- [x] **2.3** Get recent searches for user — `Query` GSI1, desc, limit N
+- [x] **2.4** Get search details by `searchId` — `GetItem`
+- [x] **2.5** Service + controller
+- [x] **2.6** Unit tests
 
 ### Phase 3: Follow-up context (feature 5)
 - [ ] **3.1** FollowUp item write under session partition
