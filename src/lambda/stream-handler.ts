@@ -5,7 +5,7 @@ import { IdempotencyRepository } from "@/modules/idempotency/idempotency.reposit
 
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 
-import { getAppContext } from "./context";
+import { getIdempotencyRepository } from "./context";
 
 interface SearchAnalyticsEvent {
   eventType: "SEARCH_CREATED";
@@ -64,8 +64,7 @@ async function processRecord(
 }
 
 export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
-  const context = await getAppContext();
-  const idempotencyRepository = context.get(IdempotencyRepository);
+  const idempotencyRepository = getIdempotencyRepository();
 
   for (const record of event.Records) {
     await processRecord(record, idempotencyRepository);

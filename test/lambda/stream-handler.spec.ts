@@ -1,13 +1,14 @@
 import type { DynamoDBStreamEvent } from "aws-lambda";
 
-import { getAppContext } from "@/lambda/context";
 import { handler } from "@/lambda/stream-handler";
+import { getIdempotencyRepository } from "@/lambda/context";
 import { KEY_PREFIX } from "@/common/dynamo/dynamo.constants";
+import { IdempotencyRepository } from "@/modules/idempotency/idempotency.repository";
 
 jest.mock("@/lambda/context");
 
 const mockIsAlreadyProcessed = jest.fn();
-const mockGetAppContext = jest.mocked(getAppContext);
+const mockGetIdempotencyRepository = jest.mocked(getIdempotencyRepository);
 
 const makeSearchInsertRecord = (eventId: string) => ({
   eventID: eventId,
@@ -38,11 +39,9 @@ describe("stream-handler", () => {
 
     consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
 
-    mockGetAppContext.mockResolvedValue({
-      get: jest.fn().mockReturnValue({
-        isAlreadyProcessed: mockIsAlreadyProcessed,
-      }),
-    } as unknown as Awaited<ReturnType<typeof getAppContext>>);
+    mockGetIdempotencyRepository.mockReturnValue({
+      isAlreadyProcessed: mockIsAlreadyProcessed,
+    } as unknown as IdempotencyRepository);
 
     mockIsAlreadyProcessed.mockResolvedValue(false);
   });

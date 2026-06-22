@@ -159,21 +159,21 @@ test/
 - [x] **4.4** Stream-event fixtures + unit tests
 
 ### Phase 5: Idempotency + resilience (feature 9)
-- [ ] **5.1** `IdempotencyRepository` — conditional put (`attribute_not_exists`) + TTL
-- [ ] **5.2** Wrap stream processing in idempotency guard (duplicate `eventID` skipped)
+- [x] **5.1** `IdempotencyRepository` — conditional put (`attribute_not_exists`) + TTL
+- [x] **5.2** Wrap stream processing in idempotency guard (duplicate `eventID` skipped)
 - [ ] **5.3** Partial batch response (`batchItemFailures`) + DLQ in CDK
-- [ ] **5.4** Tests: replay duplicate events, simulate poison record
+- [x] **5.4** Tests: replay duplicate events, simulate poison record
 
 ---
 
 ## Verification
 
-- [ ] `tsc --noEmit` compiles; strong typing holds
-- [ ] `npm run test` — repos/services with **aws-sdk-client-mock**: assert exact commands and params
+- [x] `tsc --noEmit` compiles; strong typing holds
+- [x] `npm run test` — repos/services with **aws-sdk-client-mock**: assert exact commands and params
       (PK/SK/GSI keys, `ConditionExpression`s)
-- [ ] Stream handler unit-tested against fixtures; duplicate `eventID` replay is skipped
-- [ ] Manual smoke test against real AWS table (create session, store search, get recent searches)
-- [ ] CDK deployed; table + stream + Lambda verified in AWS console
+- [x] Stream handler unit-tested against fixtures; duplicate `eventID` replay is skipped
+- [x] Manual smoke test against real AWS table (create session, store search, get recent searches)
+- [x] CDK deployed; table + stream + Lambda verified in AWS console
 
 ---
 

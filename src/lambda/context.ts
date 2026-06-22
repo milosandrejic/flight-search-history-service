@@ -1,16 +1,26 @@
-import { AppModule } from "@/app.module";
+import { IdempotencyRepository } from "@/modules/idempotency/idempotency.repository";
 
-import { NestFactory } from "@nestjs/core";
-import { INestApplicationContext } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 
-let appContext: INestApplicationContext | null = null;
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 
-export async function getAppContext(): Promise<INestApplicationContext> {
-  if (!appContext) {
-    appContext = await NestFactory.createApplicationContext(AppModule, {
-      logger: false,
-    });
+let idempotencyRepository: IdempotencyRepository | null = null;
+
+export function getIdempotencyRepository(): IdempotencyRepository {
+  if (!idempotencyRepository) {
+    const docClient = DynamoDBDocumentClient.from(
+      new DynamoDBClient({ region: process.env.DYNAMODB_REGION ?? "us-east-1" }),
+      { marshallOptions: { removeUndefinedValues: true } },
+    );
+
+    // Minimal ConfigService shim — reads from Lambda environment variables
+    const configService = {
+      get: <T>(key: string): T => process.env[key] as unknown as T,
+    } as unknown as ConfigService;
+
+    idempotencyRepository = new IdempotencyRepository(docClient, configService);
   }
 
-  return appContext;
+  return idempotencyRepository;
 }

@@ -2,6 +2,9 @@
 dist/
 build/
 
+# CDK output — generated CloudFormation + bundled Lambda assets
+cdk.out/
+
 # dependencies
 node_modules/
 
