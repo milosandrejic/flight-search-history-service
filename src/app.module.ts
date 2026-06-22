@@ -5,6 +5,7 @@ import { AppConfigModule } from "./config/config.module";
 import { DynamoModule } from "./common/dynamo/dynamo.module";
 import { SessionModule } from "./modules/session/session.module";
 import { FollowUpModule } from "./modules/follow-up/follow-up.module";
+import { IdempotencyModule } from "./modules/idempotency/idempotency.module";
 import { SearchHistoryModule } from "./modules/search-history/search-history.module";
 
 @Module({
@@ -15,6 +16,7 @@ import { SearchHistoryModule } from "./modules/search-history/search-history.mod
     SessionModule,
     SearchHistoryModule,
     FollowUpModule,
+    IdempotencyModule,
   ],
 })
 export class AppModule {}

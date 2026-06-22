@@ -152,11 +152,11 @@ test/
 - [x] **3.4** Service + controller + tests
 
 ### Phase 4: Streams + Lambda (features 7, 8)
-- [ ] **4.1** CDK: enable stream (`NEW_AND_OLD_IMAGES`) + event source mapping
-- [ ] **4.2** Cached Nest application context (`context.ts`)
-- [ ] **4.3** `stream-handler.ts` — process only `INSERT` events where `PK` begins_with `SEARCH#`
+- [x] **4.1** CDK: enable stream (`NEW_AND_OLD_IMAGES`) + event source mapping
+- [x] **4.2** Cached Nest application context (`context.ts`)
+- [x] **4.3** `stream-handler.ts` — process only `INSERT` events where `PK` begins_with `SEARCH#`
       (ignore `SESSION#`, `FOLLOWUP#`, `IDEMPOTENCY#`)
-- [ ] **4.4** Stream-event fixtures + unit tests
+- [x] **4.4** Stream-event fixtures + unit tests
 
 ### Phase 5: Idempotency + resilience (feature 9)
 - [ ] **5.1** `IdempotencyRepository` — conditional put (`attribute_not_exists`) + TTL
