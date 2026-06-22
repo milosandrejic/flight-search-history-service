@@ -1,5 +1,5 @@
 import { DYNAMO_CLIENT } from "@/common/dynamo/dynamo.module";
-import { KEY_PREFIX, GSI1_INDEX_NAME } from "@/common/dynamo/dynamo.constants";
+import { KEY_PREFIX, GSI1_INDEX_NAME, GSI2_INDEX_NAME } from "@/common/dynamo/dynamo.constants";
 
 import { ConfigService } from "@nestjs/config";
 import { Inject, Injectable } from "@nestjs/common";
@@ -59,6 +59,22 @@ export class SearchHistoryRepository {
       },
       ScanIndexForward: false,
       Limit: limit,
+    });
+
+    const result = await this.client.send(command);
+
+    return (result.Items ?? []) as SearchEntity[];
+  }
+
+  async getBySession(sessionId: string): Promise<SearchEntity[]> {
+    const command = new QueryCommand({
+      TableName: this.tableName,
+      IndexName: GSI2_INDEX_NAME,
+      KeyConditionExpression: "GSI2PK = :pk",
+      ExpressionAttributeValues: {
+        ":pk": `${KEY_PREFIX.SESSION}${sessionId}`,
+      },
+      ScanIndexForward: false
     });
 
     const result = await this.client.send(command);

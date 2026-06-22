@@ -10,5 +10,6 @@ import { SearchHistoryRepository } from "./search-history.repository";
   imports: [DynamoModule],
   controllers: [SearchHistoryController],
   providers: [SearchHistoryService, SearchHistoryRepository],
+  exports: [SearchHistoryRepository],
 })
 export class SearchHistoryModule {}
