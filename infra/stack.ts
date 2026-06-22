@@ -63,7 +63,8 @@ export class FlightSearchHistoryStack extends cdk.Stack {
       new lambdaEventSources.DynamoEventSource(table, {
         startingPosition: lambda.StartingPosition.LATEST,
         batchSize: 10,
-        bisectBatchOnError: true,   // on error: split batch in half to isolate poison record
+        bisectBatchOnError: true,          // on error: split batch in half to isolate poison record
+        reportBatchItemFailures: true,     // only retry failed records, not the whole batch
         onFailure: new lambdaEventSources.SqsDlq(dlq),
         retryAttempts: 3,
       })

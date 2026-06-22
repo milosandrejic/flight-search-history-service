@@ -10,10 +10,11 @@ jest.mock("@/lambda/context");
 const mockIsAlreadyProcessed = jest.fn();
 const mockGetIdempotencyRepository = jest.mocked(getIdempotencyRepository);
 
-const makeSearchInsertRecord = (eventId: string) => ({
+const makeSearchInsertRecord = (eventId: string, sequenceNumber = `seq-${eventId}`) => ({
   eventID: eventId,
   eventName: "INSERT" as const,
   dynamodb: {
+    SequenceNumber: sequenceNumber,
     NewImage: {
       PK: { S: `${KEY_PREFIX.SEARCH}search-1` },
       SK: { S: `${KEY_PREFIX.SEARCH}search-1` },
@@ -33,11 +34,13 @@ const makeEvent = (records: object[]): DynamoDBStreamEvent => ({
 
 describe("stream-handler", () => {
   let consoleSpy: jest.SpyInstance;
+  let consoleErrorSpy: jest.SpyInstance;
 
   beforeEach(() => {
     jest.clearAllMocks();
 
     consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+    consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
 
     mockGetIdempotencyRepository.mockReturnValue({
       isAlreadyProcessed: mockIsAlreadyProcessed,
@@ -48,14 +51,16 @@ describe("stream-handler", () => {
 
   afterEach(() => {
     consoleSpy.mockRestore();
+    consoleErrorSpy.mockRestore();
   });
 
   describe("filtering", () => {
     it("should skip non-INSERT events", async () => {
       const event = makeEvent([{ ...makeSearchInsertRecord("evt-1"), eventName: "MODIFY" }]);
 
-      await handler(event);
+      const result = await handler(event);
 
+      expect(result.batchItemFailures).toHaveLength(0);
       expect(mockIsAlreadyProcessed).not.toHaveBeenCalled();
       expect(consoleSpy).not.toHaveBeenCalled();
     });
@@ -65,6 +70,7 @@ describe("stream-handler", () => {
         eventID: "evt-2",
         eventName: "INSERT" as const,
         dynamodb: {
+          SequenceNumber: "seq-evt-2",
           NewImage: {
             PK: { S: `${KEY_PREFIX.SESSION}session-1` },
             SK: { S: `${KEY_PREFIX.SESSION}session-1` },
@@ -72,8 +78,9 @@ describe("stream-handler", () => {
         },
       };
 
-      await handler(makeEvent([sessionRecord]));
+      const result = await handler(makeEvent([sessionRecord]));
 
+      expect(result.batchItemFailures).toHaveLength(0);
       expect(mockIsAlreadyProcessed).not.toHaveBeenCalled();
       expect(consoleSpy).not.toHaveBeenCalled();
     });
@@ -82,11 +89,12 @@ describe("stream-handler", () => {
       const record = {
         eventID: "evt-3",
         eventName: "INSERT" as const,
-        dynamodb: {},
+        dynamodb: { SequenceNumber: "seq-evt-3" },
       };
 
-      await handler(makeEvent([record]));
+      const result = await handler(makeEvent([record]));
 
+      expect(result.batchItemFailures).toHaveLength(0);
       expect(mockIsAlreadyProcessed).not.toHaveBeenCalled();
     });
   });
@@ -95,8 +103,9 @@ describe("stream-handler", () => {
     it("should skip processing and log skipped when event was already processed", async () => {
       mockIsAlreadyProcessed.mockResolvedValue(true);
 
-      await handler(makeEvent([makeSearchInsertRecord("evt-4")]));
+      const result = await handler(makeEvent([makeSearchInsertRecord("evt-4")]));
 
+      expect(result.batchItemFailures).toHaveLength(0);
       expect(mockIsAlreadyProcessed).toHaveBeenCalledWith("evt-4");
       expect(consoleSpy).toHaveBeenCalledWith(
         JSON.stringify({ skipped: true, eventId: "evt-4" }),
@@ -106,8 +115,9 @@ describe("stream-handler", () => {
 
   describe("analytics event", () => {
     it("should log correct analytics event for a new SEARCH# INSERT", async () => {
-      await handler(makeEvent([makeSearchInsertRecord("evt-5")]));
+      const result = await handler(makeEvent([makeSearchInsertRecord("evt-5")]));
 
+      expect(result.batchItemFailures).toHaveLength(0);
       expect(mockIsAlreadyProcessed).toHaveBeenCalledWith("evt-5");
       expect(consoleSpy).toHaveBeenCalledWith(
         JSON.stringify({
@@ -123,13 +133,36 @@ describe("stream-handler", () => {
     });
 
     it("should process multiple records in a batch independently", async () => {
-      await handler(makeEvent([
+      const result = await handler(makeEvent([
         makeSearchInsertRecord("evt-6"),
         makeSearchInsertRecord("evt-7"),
       ]));
 
+      expect(result.batchItemFailures).toHaveLength(0);
       expect(mockIsAlreadyProcessed).toHaveBeenCalledTimes(2);
       expect(consoleSpy).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe("batchItemFailures", () => {
+    it("should return failed record sequence numbers when processing throws", async () => {
+      mockIsAlreadyProcessed.mockRejectedValueOnce(new Error("DynamoDB unavailable"));
+      mockIsAlreadyProcessed.mockResolvedValueOnce(false);
+
+      const result = await handler(makeEvent([
+        makeSearchInsertRecord("evt-8", "seq-001"),
+        makeSearchInsertRecord("evt-9", "seq-002"),
+      ]));
+
+      expect(result.batchItemFailures).toEqual([{ itemIdentifier: "seq-001" }]);
+      expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
+      expect(consoleSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it("should return empty batchItemFailures when all records succeed", async () => {
+      const result = await handler(makeEvent([makeSearchInsertRecord("evt-10")]));
+
+      expect(result.batchItemFailures).toEqual([]);
     });
   });
 });

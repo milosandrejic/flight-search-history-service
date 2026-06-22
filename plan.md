@@ -161,7 +161,7 @@ test/
 ### Phase 5: Idempotency + resilience (feature 9)
 - [x] **5.1** `IdempotencyRepository` — conditional put (`attribute_not_exists`) + TTL
 - [x] **5.2** Wrap stream processing in idempotency guard (duplicate `eventID` skipped)
-- [ ] **5.3** Partial batch response (`batchItemFailures`) + DLQ in CDK
+- [x] **5.3** Partial batch response (`batchItemFailures`) + DLQ in CDK
 - [x] **5.4** Tests: replay duplicate events, simulate poison record
 
 ---

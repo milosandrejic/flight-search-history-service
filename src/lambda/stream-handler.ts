@@ -63,10 +63,29 @@ async function processRecord(
   console.log(JSON.stringify(analyticsEvent));
 }
 
-export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
+interface BatchItemFailure {
+  itemIdentifier: string;
+}
+
+interface BatchResponse {
+  batchItemFailures: BatchItemFailure[];
+}
+
+export const handler = async (event: DynamoDBStreamEvent): Promise<BatchResponse> => {
   const idempotencyRepository = getIdempotencyRepository();
+  const batchItemFailures: BatchItemFailure[] = [];
 
   for (const record of event.Records) {
-    await processRecord(record, idempotencyRepository);
+    try {
+      await processRecord(record, idempotencyRepository);
+    } catch (err) {
+      console.error(JSON.stringify({ error: String(err), sequenceNumber: record.dynamodb?.SequenceNumber }));
+
+      if (record.dynamodb?.SequenceNumber) {
+        batchItemFailures.push({ itemIdentifier: record.dynamodb.SequenceNumber });
+      }
+    }
   }
+
+  return { batchItemFailures };
 };
