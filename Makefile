@@ -1,13 +1,13 @@
-.PHONY: deploy deploy-lambda synth bootstrap dev test start-docker
+.PHONY: diff destroy bootstrap dev test start-docker
 
-deploy:
-	npx cdk deploy --require-approval never
+## Preview infrastructure changes (safe, read-only)
+diff:
+	npx cdk diff
 
-deploy-lambda:
-	npx cdk deploy --require-approval never
-
-synth:
-	npx cdk synth
+## Tear down everything — AppStack first (depends on Persistent), then Persistent
+destroy:
+	npx cdk destroy AppStack --force
+	npx cdk destroy PersistentStack --force
 
 bootstrap:
 	npx cdk bootstrap

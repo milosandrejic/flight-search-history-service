@@ -32,10 +32,17 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      # Deploy DynamoDB + ECR + Lambda — idempotent, safe to run every time.
+      # On first deploy this creates the table and ECR repo.
+      # On subsequent deploys it's a no-op if nothing changed.
+      - name: Deploy PersistentStack
+        run: npx cdk deploy PersistentStack --require-approval never
+
       - name: Login to ECR
         id: ecr-login
         uses: aws-actions/amazon-ecr-login@v2
 
+      # Image is pushed AFTER PersistentStack so ECR repo is guaranteed to exist
       - name: Build and push Docker image
         env:
           ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
@@ -44,10 +51,26 @@ jobs:
           docker build -t $ECR_REGISTRY/flight-search-history-service:$IMAGE_TAG .
           docker push $ECR_REGISTRY/flight-search-history-service:$IMAGE_TAG
 
-      - name: Deploy via CDK
+      # Deploy VPC + Fargate + ALB pointing at the image that now exists in ECR
+      - name: Deploy AppStack
         env:
           IMAGE_TAG: ${{ github.sha }}
-        run: |
-          npx cdk deploy --require-approval never \
-            -c imageTag=$IMAGE_TAG \
-            -c streamArn=${{ secrets.DYNAMODB_STREAM_ARN }}
+        run: npx cdk deploy AppStack --require-approval never -c imageTag=$IMAGE_TAG
+
+      - name: Notify Slack on success
+        if: success()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: success
+          text: "✅ Deploy succeeded: flight-search-history-service `${{ github.sha }}`"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Notify Slack on failure
+        if: failure()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          text: "❌ Deploy failed: flight-search-history-service `${{ github.sha }}`"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

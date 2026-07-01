@@ -16,7 +16,9 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Webpack bundles all dependencies — no node_modules needed
+COPY package*.json ./
+RUN npm ci --omit=dev
+
 COPY --from=builder /app/dist ./dist
 
 EXPOSE 3000
