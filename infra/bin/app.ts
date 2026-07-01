@@ -6,9 +6,9 @@ import { FlightSearchHistoryStack } from "../stack";
 
 const app = new cdk.App();
 
+const region = app.node.tryGetContext("region") as string;
+
 new FlightSearchHistoryStack(app, "FlightSearchHistoryStack", {
-  env: {
-    account: process.env.CDK_DEFAULT_ACCOUNT,
-    region: "us-east-1",
-  },
+  // account resolved automatically from ~/.aws/credentials or OIDC role
+  env: { region },
 });

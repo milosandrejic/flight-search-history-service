@@ -1,0 +1,12 @@
+node_modules/
+dist/
+cdk.out/
+.env
+.env.local
+coverage/
+*.tsbuildinfo
+.git/
+.github/
+README.md
+DEPLOYMENT.md
+plan.md

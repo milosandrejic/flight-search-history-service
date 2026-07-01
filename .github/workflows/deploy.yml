@@ -1,0 +1,53 @@
+name: Deploy
+
+on:
+  push:
+    branches: [prod]
+
+permissions:
+  id-token: write   # required for OIDC
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push Docker image
+        env:
+          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/flight-search-history-service:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/flight-search-history-service:$IMAGE_TAG
+
+      - name: Deploy via CDK
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          npx cdk deploy --require-approval never \
+            -c imageTag=$IMAGE_TAG \
+            -c streamArn=${{ secrets.DYNAMODB_STREAM_ARN }}
